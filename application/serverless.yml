@@ -112,7 +112,9 @@ functions:
             template: ${file(templates/create_products/response.vtl)}
             statusCodes:
               201:
-                pattern: "" # Default status code
+                pattern: ".*\"products\":.*" # Default status code
+              500:
+                pattern: ".*\"Internal Server Error\".*"
 
 resources:
   Resources:
