@@ -33,6 +33,7 @@ jobs:
           python-version: "3.9"
       
       - name: Install Serverless and Plugins
+        working-directory: ${{ env.APPLICATION_DIRECTORY }}
         run: |
           npm install -g serverless@3.19.0
           serverless plugin install --name serverless-deployment-bucket
@@ -43,6 +44,7 @@ jobs:
           serverless plugin install --name serverless-prune-plugin
 
       - name: Setup Serverless with AWS credentials
+        working-directory: ${{ env.APPLICATION_DIRECTORY }}
         run: sls config credentials --provider aws --key ${{ secrets.AWS_ACCESS_KEY_ID }} --secret ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Serverless deploy
