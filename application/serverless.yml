@@ -1,0 +1,133 @@
+service: ProductsAPI
+
+frameworkVersion: "3.19.0" # Lock Serverless version
+
+plugins:
+  - serverless-deployment-bucket # Defines name and configuration for the deployment bucket
+  - serverless-certificate-creator # Creates certificate, if needed
+  - serverless-domain-manager # Defines Route53 Domain
+  - serverless-iam-roles-per-function # Allows IAM roles per function
+  - serverless-prune-plugin # Deletes older versions
+
+provider:
+  name: aws
+  runtime: python3.9
+  stage: ${env:ENVIRONMENT}
+  region: ${env:AWS_REGION, "eu-west-3"}
+
+  # Bucket that will store the zipped API
+  deploymentBucket:
+    name: ${self:custom.bucket.bucketName}
+  
+  # APi Gateway configuration
+  apiGateway:
+    apiKeySourceType: HEADER
+    apiKeys:
+      - ${self:provider.stage}-${self:service}-key
+
+  tracing:
+    apiGateway: true
+    lambda: true
+ 
+custom:
+  # Set configuration based on global configuration for Serverless
+  bucket: ${file(buckets.yml):${self:provider.stage}}
+  domain: ${file(domains.yml):${self:provider.stage}}
+  prune: ${file(prune.yml):${self:provider.stage}}
+
+  # S3
+  deploymentBucket: ${self:custom.bucket.bucketConfiguration}
+
+  # Amazon Certificate Manager
+  customCertificate:
+    hostedZoneNames: ${self:custom.domain.certificate.hostedZoneNames} # don't forget the dot on the end - is required by Route53
+    certificateName: ${self:custom.domain.certificate.certificateName}
+    region: ${self:provider.region}
+
+  # Route53
+  customDomain:
+    domainName: ${self:custom.domain.domainName}
+    certificateName: ${self:custom.domain.certificate.certificateName}
+    createRoute53Record: true # Enable plugin to create an A Alias and AAAA Alias records in Route53
+    autoDomain: false # Enable plugin to autorun create_domain/delete_domain as part of sls deploy/remove
+    basePath: "products" # API base path
+    endpointType: "regional"
+
+package:
+  individually: true
+  exclude:
+    - "**"
+
+functions:
+  createProduct:
+    name: ${self:provider.stage}-${self:service}-CreateProduct
+    description: Responsible for creating new products
+    runtime: python3.9
+    timeout: 10
+    layers:
+      - "${ssm:/${self:provider.stage}/layers/CommonLayer}"
+    package:
+      include:
+        - lib/exceptions.py
+        - lib/models.py
+        - lib/products_database.py
+        - create_products.py
+    handler: create_products.handler
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+          - dynamodb:BatchWriteItem
+        Resource:
+          Fn::GetAtt:
+            - ProductsTable
+            - Arn
+    environment:
+      STAGE: ${self:provider.stage}
+      PRODUCTS_TABLE_NAME:
+        Ref: ProductsTable
+    events:
+      - http:
+          path: /create-products
+          method: post
+          integration: lambda
+          private: true
+          cors:
+            origin: "*"
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+          request:
+            passThrough: NEVER
+            schemas:
+              application/json: ${file(schemas/create_products.json)}
+            template:
+              application/json: ${file(templates/create_products/request.vtl)}
+          response:
+            template: ${file(templates/create_products/response.vtl)}
+            statusCodes:
+              201:
+                pattern: "" # Default status code
+
+resources:
+  Resources:
+    ProductsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: Products
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: Id
+            AttributeType: S
+          - AttributeName: Brand
+            AttributeType: S
+        KeySchema:
+          - AttributeName: Id
+            KeyType: HASH
+          # - AttributeName: 
+          #   KeyType: SORT
