@@ -128,3 +128,6 @@ dmypy.json
 
 # VS Code
 .vscode
+
+# Global settings
+application/global_settings

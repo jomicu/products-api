@@ -1,13 +1,13 @@
-# Grab configuration bucket name
-BUCKET=$(aws --region=$AWS_REGION ssm get-parameter --name $PARAMETER_NAME --with-decryption --output text --query Parameter.Value)
-
 # All the configuration we need is under the folder "serverless"
 KEY="serverless"
 
-# Target directory should be the one who contains the serverless.yml (serverless.yml will refer to those files)
-# The scripts works under the assumption we have COPY_TO defined as environment variable
+# Full S3 path
 FROM="s3://$BUCKET/$KEY/"
-TO="../$COPY_TO"
 
-# Copy all the files under the key path into the application folder
+# Back to root level
+cd ..
+
+# Target directory should be the one who contains the serverless.yml
+# The scripts works under the assumption we have COPY_TO defined as environment variable
+# We then copy everything under the serverless folder in S3 to the targeted directory
 aws s3 cp $FROM $TO --recursive

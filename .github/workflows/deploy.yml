@@ -5,6 +5,7 @@ on: workflow_dispatch
 env:
   SCRIPTS_DIRECTORY: "scripts"
   SERVERLESS_DIRECTORY: "application"
+  GLOBAL_SETTINGS_DIRECTORY: "global_settings"
 
 jobs:
   deploy:
@@ -52,14 +53,15 @@ jobs:
         working-directory: ${{ env.SCRIPTS_DIRECTORY }}
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}
-          PARAMETER_NAME: GlobalConfigurationBucket
-          COPY_TO: ${{ env.SERVERLESS_DIRECTORY }}
+          BUCKET: ${{ secrets.AWS_GLOBAL_CONFIGURATION_BUCKET }}
+          COPY_TO: ${{ env.SERVERLESS_DIRECTORY }}/${{ env.GLOBAL_SETTINGS_DIRECTORY }}
         run: sh get-configuration-from-s3.sh
 
       - name: Serverless deploy
         working-directory: ${{ env.SERVERLESS_DIRECTORY }}
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}
+          GLOBAL_SETTINGS: ${{ env.GLOBAL_SETTINGS_DIRECTORY }}
           ENVIRONMENT: ${{ env.ENVIRONMENT }}
         run: |
           serverless create-cert
