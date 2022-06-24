@@ -61,7 +61,7 @@ jobs:
         working-directory: ${{ env.SERVERLESS_DIRECTORY }}
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}
-          GLOBAL_SETTINGS: ${{ env.GLOBAL_SETTINGS_DIRECTORY }}
+          GLOBAL_SETTINGS_DIRECTORY: ${{ env.GLOBAL_SETTINGS_DIRECTORY }}
           ENVIRONMENT: ${{ env.ENVIRONMENT }}
         run: |
           serverless create-cert

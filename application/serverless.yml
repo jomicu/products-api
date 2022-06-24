@@ -30,13 +30,10 @@ provider:
     lambda: true
  
 custom:
-  # Global settings directory
-  globalSettingsDirectory: ${env:GLOBAL_SETTINGS, "global_settings"} 
-
   # Set configuration based on global configuration for Serverless
-  bucket: ${file("${self:custom.globalSettingsDirectory}/buckets.yml"):${self:provider.stage}}
-  domain: ${file("${self:custom.globalSettingsDirectory}/domains.yml"):${self:provider.stage}}
-  prune: ${file("${self:custom.globalSettingsDirectory}/prune.yml"):${self:provider.stage}}
+  bucket: ${file(${env:GLOBAL_SETTINGS_DIRECTORY}/buckets.yml):${self:provider.stage}.apis}
+  domain: ${file(${env:GLOBAL_SETTINGS_DIRECTORY}/domains.yml):${self:provider.stage}}
+  prune: ${file(${env:GLOBAL_SETTINGS_DIRECTORY}/prune.yml):${self:provider.stage}}
 
   # S3
   deploymentBucket: ${self:custom.bucket.bucketConfiguration}
