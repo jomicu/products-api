@@ -3,7 +3,8 @@ name: Deploy ProductsAPI with Serverless
 on: workflow_dispatch
 
 env:
-  APPLICATION_DIRECTORY: "application"
+  SCRIPTS_DIRECTORY: "scripts"
+  SERVERLESS_DIRECTORY: "application"
 
 jobs:
   deploy:
@@ -33,7 +34,7 @@ jobs:
           python-version: "3.9"
       
       - name: Install Serverless and Plugins
-        working-directory: ${{ env.APPLICATION_DIRECTORY }}
+        working-directory: ${{ env.SERVERLESS_DIRECTORY }}
         run: |
           npm install -g serverless@3.19.0
           serverless plugin install --name serverless-deployment-bucket
@@ -44,11 +45,17 @@ jobs:
           serverless plugin install --name serverless-prune-plugin
 
       - name: Setup Serverless with AWS credentials
-        working-directory: ${{ env.APPLICATION_DIRECTORY }}
+        working-directory: ${{ env.SERVERLESS_DIRECTORY }}
         run: sls config credentials --provider aws --key ${{ secrets.AWS_ACCESS_KEY_ID }} --secret ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
+      - name: Copy configuration files from S3
+        working-directory: ${{ env.SCRIPTS_DIRECTORY }}
+        env:
+          COPY_TO: ${{ env.SERVERLESS_DIRECTORY }}
+        run: sh get-configuration-from-s3.sh
+
       - name: Serverless deploy
-        working-directory: ${{ env.APPLICATION_DIRECTORY }}
+        working-directory: ${{ env.SERVERLESS_DIRECTORY }}
         env:
           # AWS_REGION: ${{ secrets.AWS_REGION }}
           ENVIRONMENT: ${{ env.ENVIRONMENT }}

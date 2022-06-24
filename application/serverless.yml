@@ -30,13 +30,10 @@ provider:
     lambda: true
  
 custom:
-  # Global configuration
-  globalServerlessConfiguration: ${ssm:GlobalConfigurationBucket}/serverless
-
   # Set configuration based on global configuration for Serverless
-  bucket: ${file(${s3:${self:custom.globalServerlessConfiguration}/buckets.yml}):${self:provider.stage}}
-  domain: ${file(${s3:${self:custom.globalServerlessConfiguration}/domains.yml}):${self:provider.stage}}
-  prune: ${file(${s3:${self:custom.globalServerlessConfiguration}/prune.yml}):${self:provider.stage}}
+  bucket: ${file(buckets.yml):${self:provider.stage}}
+  domain: ${file(domains.yml):${self:provider.stage}}
+  prune: ${file(prune.yml):${self:provider.stage}}
 
   # S3
   deploymentBucket: ${self:custom.bucket.bucketConfiguration}
