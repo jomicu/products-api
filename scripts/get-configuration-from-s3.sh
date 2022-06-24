@@ -1,5 +1,5 @@
 # Grab configuration bucket name
-BUCKET=$(aws --region=us-east-1 ssm get-parameter --name "GlobalConfigurationBucket" --with-decryption --output text --query Parameter.Value)
+BUCKET=$(aws --region=$AWS_REGION ssm get-parameter --name $PARAMETER_NAME --with-decryption --output text --query Parameter.Value)
 
 # All the configuration we need is under the folder "serverless"
 KEY="serverless"
