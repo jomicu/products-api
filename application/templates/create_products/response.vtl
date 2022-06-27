@@ -1,7 +1,7 @@
 #set($statusCode = $input.path('$.status_code'))
-#set($products = $input.path('$.products')) 
 
-#if("$statusCode" == "201")
+#if($statusCode == 201)
+#set($products = $input.path('$.products')) 
 {
   "products": [
     #foreach($product in $products) 
@@ -20,5 +20,9 @@
       }#if($foreach.hasNext),#end
     #end
   ]
+}
+#else
+{
+  "message": "Internal Server Error"
 }
 #end
