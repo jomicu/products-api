@@ -114,7 +114,7 @@ functions:
               500:
                 pattern: "" # Default
               201:
-                pattern: ".*\"products\":.*"
+                pattern: ".*products.*"
 
 resources:
   Resources:
