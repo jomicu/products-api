@@ -113,8 +113,6 @@ functions:
             statusCodes:
               201:
                 pattern: ".*\"products\":.*" # Default status code
-              500:
-                pattern: "Internal Server Error"
 
 resources:
   Resources:

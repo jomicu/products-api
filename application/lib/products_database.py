@@ -2,8 +2,9 @@ from os import environ
 from logging import INFO, getLogger
 from dataclasses import asdict
 
-from dynamo_databases import DynamoDatabase
-from models import Product
+from dynamo_databases import DynamoDatabase # CommonLayer
+
+from lib.models import Product
 
 logger = getLogger()
 logger.setLevel(INFO)
