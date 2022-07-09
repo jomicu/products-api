@@ -1,6 +1,6 @@
 service: ProductsAPI
 
-frameworkVersion: "3.19.0" # Lock Serverless version
+frameworkVersion: "3.20.0" # Lock Serverless version
 
 plugins:
   - serverless-deployment-bucket # Defines name and configuration for the deployment bucket
@@ -111,8 +111,10 @@ functions:
           response:
             template: ${file(templates/create_products/response.vtl)}
             statusCodes:
+              500:
+                pattern: "" # Default
               201:
-                pattern: ".*\"products\":.*" # Default status code
+                pattern: ".*products.*"
 
 resources:
   Resources:

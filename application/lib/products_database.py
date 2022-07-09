@@ -2,7 +2,7 @@ from os import environ
 from logging import INFO, getLogger
 from dataclasses import asdict
 
-from dynamo_databases import DynamoDatabase # CommonLayer
+from common.dynamo_databases import DynamoDatabase # CommonLayer
 
 from lib.models import Product
 
